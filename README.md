@@ -21,31 +21,43 @@
 
 ### 方式一：作为 Kimi Code 插件安装（推荐）
 
-本目录已包含标准插件清单 [kimi.plugin.json](kimi.plugin.json)，同时声明了 `systemPromptPath`（自动注入 `rules/AGENTS.md`）与 `hooks`（`PreToolUse`）：
+本仓库包含标准插件清单 [kimi.plugin.json](kimi.plugin.json)，启用后会自动注入 `rules/AGENTS.md`（`systemPromptPath`）并注册 `PreToolUse` Hook。
 
-1. 在 Kimi Code CLI 中打开插件管理（`/plugins`），选择安装自定义插件并填入本地路径：
+1. 在 Kimi Code CLI 中执行 `/plugins`，选择**安装自定义插件**，填入 GitHub 仓库地址：
    ```text
-   /home/das/code/kimi-rtk-hooks
+   https://github.com/hjgyuhuk/kimi-rtk-hooks
    ```
-2. 启用 `rtk` 插件并重载/开启新会话即可生效。
+   （如果你已 clone 到本地，也可以直接填本地目录路径。）
+2. 启用 `rtk` 插件，并执行 `/plugins reload` 或开启新会话即可生效。
 
 ### 方式二：手动配置 `~/.kimi-code/config.toml`
 
-1. 将 `config.example.toml` 中的 `[[hooks]]` 合并到 `~/.kimi-code/config.toml`（注意将路径改为本仓库实际路径）：
+1. 克隆本仓库到本地：
+   ```bash
+   git clone https://github.com/hjgyuhuk/kimi-rtk-hooks.git
+   ```
+
+2. 将 `config.example.toml` 中的 `[[hooks]]` 合并到 `~/.kimi-code/config.toml`（将路径替换为实际克隆路径）：
 
 ```toml
 [[hooks]]
 event = "PreToolUse"
 matcher = "^(Bash|Shell)$"
-command = "node /home/das/code/kimi-rtk-hooks/hooks/rtk-rewrite.mjs"
+command = "node /path/to/kimi-rtk-hooks/hooks/rtk-rewrite.mjs"
 timeout = 10
 ```
 
 > Kimi Code CLI 的 `[[hooks]]` 仅允许 `event`、`matcher`、`command`、`timeout` 四个字段，多写会导致配置加载失败。
 
-2. （推荐）将 `rules/AGENTS.md` 的内容加入到你的 Kimi Code 指令文件中，让模型默认直接调用 `rtk` 命令。
+3. （推荐）将 `rules/AGENTS.md` 的内容加入到你的 Kimi Code 指令文件中，让模型默认直接调用 `rtk` 命令。
 
-3. 重启 Kimi Code CLI 会话使配置生效。
+4. 重启 Kimi Code CLI 会话使配置生效。
+
+## 验证插件是否生效
+
+1. 在 Kimi Code CLI 中输入普通命令需求（如 `查看当前目录文件列表`），模型应优先直接执行 `rtk ls`。
+2. 输入 `不要加 rtk 前缀，直接用 Bash 执行 ls -la`，首次裸命令会被 Hook 阻断并提示改用 `rtk ls -la`，随后模型自动重跑成功。
+3. 当 RTK 压缩结果确实不可用时，使用 `rtk bypass <cmd>` 会被 Hook 直接放行。
 
 ## 环境变量
 
