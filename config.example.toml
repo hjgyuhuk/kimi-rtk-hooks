@@ -1,0 +1,9 @@
+# Merge this section into ~/.kimi-code/config.toml
+# Note: Kimi Code CLI only allows these four fields in [[hooks]]:
+#   event, matcher, command, timeout
+
+[[hooks]]
+event = "PreToolUse"
+matcher = "^(Bash|Shell)$"
+command = "node /home/das/code/kimi-rtk-hooks/hooks/rtk-rewrite.mjs"
+timeout = 10
